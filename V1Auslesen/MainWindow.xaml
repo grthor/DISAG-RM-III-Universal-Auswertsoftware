@@ -1,0 +1,29 @@
+﻿<Window x:Class="V1Auslesen.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:V1Auslesen"
+        mc:Ignorable="d"
+        Title="DISAG RM III Universal Connector" Height="450" Width="800">
+    <Grid>
+        <Button x:Name="buttonConnect" Content="Connect" HorizontalAlignment="Left" Margin="135,33,0,0" VerticalAlignment="Top" Width="62" Click="buttonConnect_Click"/>
+        <Button x:Name="buttonDisconnect" Content="Disconnect" HorizontalAlignment="Left" Margin="202,33,0,0" VerticalAlignment="Top" Click="buttonDisconnect_Click" IsEnabled="False"/>
+        <ComboBox x:Name="comboBoxCOMPorts" HorizontalAlignment="Left" Margin="10,32,0,0" VerticalAlignment="Top" Width="120"/>
+        <Label x:Name="labelStatus" Content="getrennt" HorizontalAlignment="Left" Margin="135,58,0,0" VerticalAlignment="Top" Width="120"/>
+        <Label Content="Verbindungsstatus:" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Width="120" Background="White"/>
+        <CheckBox x:Name="checkBoxDTR" Content="Data Terminal Ready (DTR)" HorizontalAlignment="Left" Margin="10,118,0,0" VerticalAlignment="Top" Checked="checkBoxDTR_Checked" Unchecked="checkBoxDTR_Unchecked"/>
+        <CheckBox x:Name="checkBoxRTS" Content="Request To Send (RTS)" HorizontalAlignment="Left" Margin="10,138,0,0" VerticalAlignment="Top" Unchecked="checkBoxRTS_Unchecked" Checked="checkBoxRTS_Checked"/>
+        <Label Content="Status der RM III" HorizontalAlignment="Left" Margin="10,217,0,0" VerticalAlignment="Top"/>
+        <Label Content="Data Set Ready (DSR) gesetzt" HorizontalAlignment="Left" Margin="10,243,0,0" VerticalAlignment="Top"/>
+        <Label Content="Clear To Send (CTS) gesetzt" HorizontalAlignment="Left" Margin="10,269,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="labelDSR" Content="off" HorizontalAlignment="Left" Margin="179,243,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="labelCTS" Content="off" HorizontalAlignment="Left" Margin="179,269,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="buttonRefreshDSRCTS" Content="Aktualisieren" HorizontalAlignment="Left" Margin="132,220,0,0" VerticalAlignment="Top" Click="buttonRefreshDSRCTS_Click" IsEnabled="False"/>
+        <TextBox x:Name="textBoxReceivedData" HorizontalAlignment="Left" Margin="307,33,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="411" Height="184"/>
+        <Label Content="Epfangene Daten" HorizontalAlignment="Left" Margin="307,10,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="labelReadBuffer" Content="" HorizontalAlignment="Left" Margin="503,10,0,0" VerticalAlignment="Top"/>
+        <DataGrid x:Name="dataGridShots" Margin="307,222,82,10"/>
+
+    </Grid>
+</Window>
