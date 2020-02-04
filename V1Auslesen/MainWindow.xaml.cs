@@ -67,6 +67,7 @@ namespace V1Auslesen
                 buttonDisconnect.IsEnabled = true;
                 labelStatus.Content = "verbunden";
                 buttonRefreshDSRCTS.IsEnabled = true;
+                buttonSnedCommand.IsEnabled = true;
             } 
             catch (Exception err)
             {
@@ -86,6 +87,7 @@ namespace V1Auslesen
                     buttonDisconnect.IsEnabled = false;
                     buttonConnect.IsEnabled = true;
                     buttonRefreshDSRCTS.IsEnabled = false;
+                    buttonSnedCommand.IsEnabled = false;
                 }
                 catch (Exception err)
                 {
@@ -166,7 +168,42 @@ namespace V1Auslesen
             shots.Add(s);
         }
 
+        private void buttonSnedCommand_Click(object sender, RoutedEventArgs e)
+        {
+            sendData();
+        }
 
+        private void textBoxBefehl_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                sendData();
+            }
+        }
+
+        private void sendData()
+        {
+            if (!textBoxBefehl.Text.Equals(""))
+            {
+                if (serialPort1.IsOpen)
+                {
+                    //Gesendeten Kommand in der Textbox anzeigen.
+                    textBoxOutput.AppendText(textBoxBefehl.Text.Trim() + "\n");
+                    textBoxOutput.ScrollToEnd();
+
+                    //Befehl senden
+                    serialPort1.Write(textBoxBefehl.Text.Trim());
+                } else
+                {
+                    MessageBox.Show("Keine Verbindung", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            } 
+            else
+            {
+                MessageBox.Show("Kein Befehl eingegeben", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            
+        }
     }
 
 

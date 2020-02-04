@@ -24,6 +24,10 @@
         <Label Content="Epfangene Daten" HorizontalAlignment="Left" Margin="307,10,0,0" VerticalAlignment="Top"/>
         <Label x:Name="labelReadBuffer" Content="" HorizontalAlignment="Left" Margin="503,10,0,0" VerticalAlignment="Top"/>
         <DataGrid x:Name="dataGridShots" Margin="307,222,82,10"/>
+        <TextBox x:Name="textBoxBefehl" HorizontalAlignment="Left" Margin="10,90,0,0" Text="Befehl" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" KeyDown="textBoxBefehl_KeyDown"/>
+        <Button x:Name="buttonSnedCommand" Content="Befehl senden" HorizontalAlignment="Left" Margin="135,89,0,0" VerticalAlignment="Top" Click="buttonSnedCommand_Click" IsEnabled="False"/>
+        <TextBox x:Name="textBoxOutput" HorizontalAlignment="Left" Margin="10,323,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="292" Height="79" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+        <Label x:Name="label" Content="Gesendete Befehle" HorizontalAlignment="Left" Margin="10,297,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
