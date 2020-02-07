@@ -6,13 +6,25 @@ namespace V1Auslesen
 {
     class Shot
     {
-        public int SchussnummerInSerie { get; set; }
-        public float Ringe { get; set; }
-        public float Teiler { get; set; }
-        public float XAbweichung { get; set; }
-        public float YAbweichung { get; set; }
+        public double Ringe { get; set; }
+        public double Teiler { get; set; }
+        public double XAbweichung { get; set; }
+        public double YAbweichung { get; set; }
         public string Markierung { get; set; }
 
+        public Shot()
+        {
 
+        }
+
+        public Shot(int ringe)
+        {
+            Ringe = ringe;
+        }
+
+        public override string ToString()
+        {
+            return Ringe.ToString();
+        }
     }
 }
