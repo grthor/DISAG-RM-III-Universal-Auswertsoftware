@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Title="DISAG RM III Universal Connector" Height="583" Width="1141">
     <Grid>
-        <Button x:Name="buttonConnect" Content="Connect" HorizontalAlignment="Left" Margin="135,33,0,0" VerticalAlignment="Top" Width="62" Click="buttonConnect_Click"/>
-        <Button x:Name="buttonDisconnect" Content="Disconnect" HorizontalAlignment="Left" Margin="202,33,0,0" VerticalAlignment="Top" Click="buttonDisconnect_Click" IsEnabled="False"/>
-        <ComboBox x:Name="comboBoxCOMPorts" HorizontalAlignment="Left" Margin="10,32,0,0" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="buttonConnect" Content="Connect" HorizontalAlignment="Left" Margin="155,33,0,0" VerticalAlignment="Top" Width="62" Click="buttonConnect_Click"/>
+        <Button x:Name="buttonDisconnect" Content="Disconnect" HorizontalAlignment="Left" Margin="222,33,0,0" VerticalAlignment="Top" Click="buttonDisconnect_Click" IsEnabled="False"/>
+        <ComboBox x:Name="comboBoxCOMPorts" HorizontalAlignment="Left" Margin="10,32,0,0" VerticalAlignment="Top" Width="60"/>
         <Label x:Name="labelStatus" Content="getrennt" HorizontalAlignment="Left" Margin="135,58,0,0" VerticalAlignment="Top" Width="120"/>
         <Label Content="Verbindungsstatus:" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Width="120" Background="White"/>
         <CheckBox x:Name="checkBoxDTR" Content="Data Terminal Ready (DTR)" HorizontalAlignment="Left" Margin="10,118,0,0" VerticalAlignment="Top" Checked="checkBoxDTR_Checked" Unchecked="checkBoxDTR_Unchecked"/>
@@ -29,7 +29,10 @@
         <TextBox x:Name="textBoxOutput" HorizontalAlignment="Left" Margin="10,323,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="292" Height="136" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
         <Label x:Name="label" Content="Gesendete Befehle" HorizontalAlignment="Left" Margin="10,297,0,0" VerticalAlignment="Top"/>
         <DataGrid x:Name="dataGridSeries" Margin="498,222,497,108"/>
-        <TextBox x:Name="textBoxHex" HorizontalAlignment="Left" Margin="649,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="353" Height="100"/>
+        <ComboBox x:Name="comboBoxBaudrate" HorizontalAlignment="Left" Margin="77,32,0,0" VerticalAlignment="Top" Width="70" SelectedIndex="0">
+            <ComboBoxItem Content="2400"/>
+            <ComboBoxItem Content="38400"/>
+        </ComboBox>
 
     </Grid>
 </Window>

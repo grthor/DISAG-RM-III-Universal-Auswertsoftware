@@ -52,7 +52,7 @@ namespace V1Auslesen
             try
             {
                 serialPort1.PortName = comboBoxCOMPorts.Text;
-                serialPort1.BaudRate = 38400;
+                serialPort1.BaudRate = Int32.Parse(comboBoxBaudrate.Text);
                 serialPort1.DataBits = 8;
                 serialPort1.StopBits = StopBits.One;
                 serialPort1.Parity = Parity.None;
@@ -68,7 +68,7 @@ namespace V1Auslesen
                 labelStatus.Content = "verbunden";
                 buttonRefreshDSRCTS.IsEnabled = true;
                 buttonSnedCommand.IsEnabled = true;
-            } 
+            }
             catch (Exception err)
             {
                 MessageBox.Show(err.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -132,19 +132,23 @@ namespace V1Auslesen
         private void SerialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
 
-            ////Read ASCI Code
-            //serialPort1.NewLine = "\r";
-            //// If not working change to 
-            //string dataIn = serialPort1.ReadLine();
-            //// string dataIn = serialPort1.ReadExisting();
-            //Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), dataIn);
+            //Read ASCI Code
+            serialPort1.NewLine = "\r";
+            // If not working change to 
+            string dataIn = serialPort1.ReadLine();
+            // string dataIn = serialPort1.ReadExisting();
+            Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), dataIn);
+            // Send ACK; hier müsste man jetzt prüfen ob die Checksumme
+            // stimmt.Letztes Zeichen ist Checksumme(Alle Zeichen xor verknüpft)
+            // Wenn kleiner als checksumme< 32, dann checksumme +32(anzeigbarkeit < 32 nur steuerzeichen)
+            // Dispatcher.Invoke(new SendACKDelegate(SendACK));
 
             //Read HEX Code
-            int length = serialPort1.BytesToRead;
-            byte[] buf = new byte[length];
-            serialPort1.Read(buf, 0, length);
-            System.Diagnostics.Debug.WriteLine("Received Data:" + buf);
-            Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), BitConverter.ToString(buf));
+            //int length = serialPort1.BytesToRead;
+            //byte[] buf = new byte[length];
+            //serialPort1.Read(buf, 0, length);
+            //System.Diagnostics.Debug.WriteLine("Received Data:" + buf);
+            //Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), BitConverter.ToString(buf));
 
             // Parse the input:
             // Dispatcher.Invoke(new ParseShotDelegate(ParseShot), dataIn);
@@ -152,6 +156,16 @@ namespace V1Auslesen
 
         private delegate void UpdateUiTextDelegate(string text);
         private delegate void ParseShotDelegate(string text);
+        private delegate void SendACKDelegate();
+
+        private void SendACK() {
+            // 0x06 ist ACK 
+            byte[] acks = new byte[1]
+            {
+                0x06
+            };
+            serialPort1.Write(acks, 0, 1);
+        }
 
         private void WriteData(string text)
         {
@@ -182,18 +196,18 @@ namespace V1Auslesen
 
         private void buttonSnedCommand_Click(object sender, RoutedEventArgs e)
         {
-            sendData();
+            SendData();
         }
 
         private void textBoxBefehl_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                sendData();
+                SendData();
             }
         }
 
-        private void sendData()
+        private void SendData()
         {
             //Preprocess Data
             string command = textBoxBefehl.Text.Trim() + "\r";
@@ -214,8 +228,10 @@ namespace V1Auslesen
                     {
                         if (serialPort1.DtrEnable)
                         {
-                            //Befehl senden
+                            //Befehl senden als string
                             serialPort1.Write(command);
+                            // Befehl senden als Byte[]
+                            //serialPort1.Write(buf, 0, buf.Length);
                             //Gesendeten Kommand in der Textbox anzeigen.
                             textBoxOutput.AppendText("Erfolgreich gesendet: " + command + "\n");
                             textBoxOutput.ScrollToEnd();
