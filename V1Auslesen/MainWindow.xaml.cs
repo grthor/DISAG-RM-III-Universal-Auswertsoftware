@@ -195,6 +195,13 @@ namespace V1Auslesen
 
         private void sendData()
         {
+            //Preprocess Data
+            string command = textBoxBefehl.Text.Trim() + "\r";
+            // Print command as dezimal values 
+            byte[] buf = Encoding.ASCII.GetBytes(command);
+            textBoxOutput.AppendText(BitConverter.ToString(buf) + "\n");
+            //serialPort1.Write(buf, 0, buf.Length);
+
             if (!textBoxBefehl.Text.Equals(""))
             {
                 if (serialPort1.IsOpen)
@@ -208,16 +215,16 @@ namespace V1Auslesen
                         if (serialPort1.DtrEnable)
                         {
                             //Befehl senden
-                            serialPort1.Write(textBoxBefehl.Text.Trim());
+                            serialPort1.Write(command);
                             //Gesendeten Kommand in der Textbox anzeigen.
-                            textBoxOutput.AppendText("Erfolgreich gesendet: " + textBoxBefehl.Text.Trim() + "\n");
+                            textBoxOutput.AppendText("Erfolgreich gesendet: " + command + "\n");
                             textBoxOutput.ScrollToEnd();
                             commandSend = true;
                         }
                         currentTime = DateTime.Now;
                         if (currentTime.Ticks - startTime.Ticks > 5000000)
                         {
-                            textBoxOutput.AppendText("Timeout while sending: " + textBoxBefehl.Text.Trim() + "\n");
+                            textBoxOutput.AppendText("Timeout while sending: " + command + "\n");
                             textBoxOutput.ScrollToEnd();
                             timeout = true;
                         }
