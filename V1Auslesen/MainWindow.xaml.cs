@@ -52,11 +52,12 @@ namespace V1Auslesen
             try
             {
                 serialPort1.PortName = comboBoxCOMPorts.Text;
-                serialPort1.BaudRate = 2400;
+                serialPort1.BaudRate = 38400;
                 serialPort1.DataBits = 8;
                 serialPort1.StopBits = StopBits.One;
                 serialPort1.Parity = Parity.None;
                 // Wenn es nicht läuf hier 
+                // Handshakes werden nur bei langsamen Empfängern genutzt. Hier nicht.
                 // serialPort1.Handshake = Handshake.RequestToSend;
 
                 serialPort1.Open();
@@ -130,12 +131,23 @@ namespace V1Auslesen
 
         private void SerialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            serialPort1.NewLine = "\r";
-            string dataIn = serialPort1.ReadLine();
-            // If not working change to 
-            //string dataIn = serialPort1.ReadExisting();
-            Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), dataIn);
-            Dispatcher.Invoke(new ParseShotDelegate(ParseShot), dataIn);
+
+            ////Read ASCI Code
+            //serialPort1.NewLine = "\r";
+            //// If not working change to 
+            //string dataIn = serialPort1.ReadLine();
+            //// string dataIn = serialPort1.ReadExisting();
+            //Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), dataIn);
+
+            //Read HEX Code
+            int length = serialPort1.BytesToRead;
+            byte[] buf = new byte[length];
+            serialPort1.Read(buf, 0, length);
+            System.Diagnostics.Debug.WriteLine("Received Data:" + buf);
+            Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), BitConverter.ToString(buf));
+
+            // Parse the input:
+            // Dispatcher.Invoke(new ParseShotDelegate(ParseShot), dataIn);
         }
 
         private delegate void UpdateUiTextDelegate(string text);
@@ -144,6 +156,7 @@ namespace V1Auslesen
         private void WriteData(string text)
         {
             textBoxReceivedData.Text += text;
+            textBoxReceivedData.ScrollToEnd();
         }
 
         private void ParseShot(string text)
@@ -186,12 +199,29 @@ namespace V1Auslesen
             {
                 if (serialPort1.IsOpen)
                 {
-                    //Gesendeten Kommand in der Textbox anzeigen.
-                    textBoxOutput.AppendText(textBoxBefehl.Text.Trim() + "\n");
-                    textBoxOutput.ScrollToEnd();
-
-                    //Befehl senden
-                    serialPort1.Write(textBoxBefehl.Text.Trim());
+                    DateTime startTime = DateTime.Now;
+                    DateTime currentTime;
+                    bool commandSend = false;
+                    bool timeout = false;
+                    while (!commandSend && !timeout)
+                    {
+                        if (serialPort1.DtrEnable)
+                        {
+                            //Befehl senden
+                            serialPort1.Write(textBoxBefehl.Text.Trim());
+                            //Gesendeten Kommand in der Textbox anzeigen.
+                            textBoxOutput.AppendText("Erfolgreich gesendet: " + textBoxBefehl.Text.Trim() + "\n");
+                            textBoxOutput.ScrollToEnd();
+                            commandSend = true;
+                        }
+                        currentTime = DateTime.Now;
+                        if (currentTime.Ticks - startTime.Ticks > 5000000)
+                        {
+                            textBoxOutput.AppendText("Timeout while sending: " + textBoxBefehl.Text.Trim() + "\n");
+                            textBoxOutput.ScrollToEnd();
+                            timeout = true;
+                        }
+                    } 
                 } else
                 {
                     MessageBox.Show("Keine Verbindung", "Error", MessageBoxButton.OK, MessageBoxImage.Error);

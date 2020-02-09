@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:V1Auslesen"
         mc:Ignorable="d"
-        Title="DISAG RM III Universal Connector" Height="485" Width="862">
+        Title="DISAG RM III Universal Connector" Height="583" Width="1141">
     <Grid>
         <Button x:Name="buttonConnect" Content="Connect" HorizontalAlignment="Left" Margin="135,33,0,0" VerticalAlignment="Top" Width="62" Click="buttonConnect_Click"/>
         <Button x:Name="buttonDisconnect" Content="Disconnect" HorizontalAlignment="Left" Margin="202,33,0,0" VerticalAlignment="Top" Click="buttonDisconnect_Click" IsEnabled="False"/>
@@ -20,15 +20,16 @@
         <Label x:Name="labelDSR" Content="off" HorizontalAlignment="Left" Margin="179,243,0,0" VerticalAlignment="Top"/>
         <Label x:Name="labelCTS" Content="off" HorizontalAlignment="Left" Margin="179,269,0,0" VerticalAlignment="Top"/>
         <Button x:Name="buttonRefreshDSRCTS" Content="Aktualisieren" HorizontalAlignment="Left" Margin="132,220,0,0" VerticalAlignment="Top" Click="buttonRefreshDSRCTS_Click" IsEnabled="False"/>
-        <TextBox x:Name="textBoxReceivedData" HorizontalAlignment="Left" Margin="307,33,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="411" Height="184"/>
+        <TextBox x:Name="textBoxReceivedData" HorizontalAlignment="Left" Margin="307,33,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="337" Height="184"/>
         <Label Content="Epfangene Daten" HorizontalAlignment="Left" Margin="307,10,0,0" VerticalAlignment="Top"/>
         <Label x:Name="labelReadBuffer" Content="" HorizontalAlignment="Left" Margin="503,10,0,0" VerticalAlignment="Top"/>
-        <DataGrid x:Name="dataGridTeilnehmer" Margin="307,222,283,10" SelectionChanged="dataGridTeilnehmer_SelectionChanged"/>
+        <DataGrid x:Name="dataGridTeilnehmer" Margin="307,222,658,108" SelectionChanged="dataGridTeilnehmer_SelectionChanged"/>
         <TextBox x:Name="textBoxBefehl" HorizontalAlignment="Left" Margin="10,90,0,0" Text="Befehl" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" KeyDown="textBoxBefehl_KeyDown"/>
         <Button x:Name="buttonSnedCommand" Content="Befehl senden" HorizontalAlignment="Left" Margin="135,89,0,0" VerticalAlignment="Top" Click="buttonSnedCommand_Click" IsEnabled="False"/>
         <TextBox x:Name="textBoxOutput" HorizontalAlignment="Left" Margin="10,323,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="292" Height="136" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
         <Label x:Name="label" Content="Gesendete Befehle" HorizontalAlignment="Left" Margin="10,297,0,0" VerticalAlignment="Top"/>
-        <DataGrid x:Name="dataGridSeries" Margin="584,222,10,10"/>
+        <DataGrid x:Name="dataGridSeries" Margin="498,222,497,108"/>
+        <TextBox x:Name="textBoxHex" HorizontalAlignment="Left" Margin="649,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="353" Height="100"/>
 
     </Grid>
 </Window>
