@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,10 +30,15 @@ namespace V1Auslesen
         private StringBuilder readBuffer = new StringBuilder();
         private ObservableCollection<Teilnehmer> teilnehmer = new ObservableCollection<Teilnehmer>();
         private ObservableCollection<Shot> shots = new ObservableCollection<Shot>();
+        private Thread t;
+        private Thread statusThread;
 
         public MainWindow()
         {
             InitializeComponent();
+            statusThread = new Thread(new ThreadStart(CheckDTRRTS));
+            statusThread.IsBackground = true;
+            statusThread.Start();
 
             string[] ports = SerialPort.GetPortNames();
             foreach (String port in ports)
@@ -52,21 +58,23 @@ namespace V1Auslesen
             try
             {
                 serialPort1.PortName = comboBoxCOMPorts.Text;
-                serialPort1.BaudRate = Int32.Parse(comboBoxBaudrate.Text);
+                serialPort1.BaudRate = 2400;
                 serialPort1.DataBits = 8;
                 serialPort1.StopBits = StopBits.One;
                 serialPort1.Parity = Parity.None;
-                // Wenn es nicht läuf hier 
-                // Handshakes werden nur bei langsamen Empfängern genutzt. Hier nicht.
-                // serialPort1.Handshake = Handshake.RequestToSend;
 
                 serialPort1.Open();
                 serialPort1.DataReceived += new SerialDataReceivedEventHandler(SerialPort1_DataReceived);
 
+                serialPort1.DtrEnable = true;
+                //t = new Thread(new ThreadStart(changeToRemoteControl));
+                //t.Start();
+                
+                
+
                 buttonConnect.IsEnabled = false;
                 buttonDisconnect.IsEnabled = true;
                 labelStatus.Content = "verbunden";
-                buttonRefreshDSRCTS.IsEnabled = true;
                 buttonSnedCommand.IsEnabled = true;
             }
             catch (Exception err)
@@ -75,18 +83,69 @@ namespace V1Auslesen
             }
         }
 
+        private void CheckDTRRTS()
+        {
+            bool ctsHolding = false;
+            bool dsrHolding = false;
+            while (true)
+            {
+                if (serialPort1.IsOpen)
+                {
+                    if (ctsHolding != serialPort1.CtsHolding)
+                    {
+                        Dispatcher.Invoke(new UpdateCTSLabelDelegete(UpdateCTSLabel), serialPort1.CtsHolding);
+                        ctsHolding = serialPort1.CtsHolding;
+                    }
+                    if (dsrHolding != serialPort1.DsrHolding)
+                    {
+                        Dispatcher.Invoke(new UpdateDSRLabelDelegate(UpdateDSRLabel), serialPort1.DsrHolding);
+                        dsrHolding = serialPort1.DsrHolding;
+                    }
+                }
+                Thread.Sleep(500);
+            }
+        }
+
+        private delegate void UpdateCTSLabelDelegete(bool status);
+        private delegate void UpdateDSRLabelDelegate(bool status);
+
+        private void UpdateCTSLabel(bool status)
+        {
+            if (status)
+            {
+                labelCTS.Content = "on";
+            }
+            else
+            {
+                labelCTS.Content = "off";
+            }
+        }
+        private void UpdateDSRLabel(bool status)
+        {
+            if (status)
+            {
+                labelDSR.Content = "on";
+            } 
+            else
+            {
+                labelDSR.Content = "off";
+            }
+        }
+
+
+
         private void buttonDisconnect_Click(object sender, RoutedEventArgs e)
         {
             if (serialPort1.IsOpen)
             {
                 try
                 {
+
                     serialPort1.Close();
 
                     labelStatus.Content = "getrennt";
                     buttonDisconnect.IsEnabled = false;
                     buttonConnect.IsEnabled = true;
-                    buttonRefreshDSRCTS.IsEnabled = false;
                     buttonSnedCommand.IsEnabled = false;
                 }
                 catch (Exception err)
@@ -96,25 +155,6 @@ namespace V1Auslesen
             }
         }
 
-        private void checkBoxDTR_Checked(object sender, RoutedEventArgs e)
-        {
-            serialPort1.DtrEnable = true;
-        }
-
-        private void checkBoxDTR_Unchecked(object sender, RoutedEventArgs e)
-        {
-            serialPort1.DtrEnable = false;
-        }
-
-        private void checkBoxRTS_Unchecked(object sender, RoutedEventArgs e)
-        {
-            serialPort1.RtsEnable = false;
-        }
-
-        private void checkBoxRTS_Checked(object sender, RoutedEventArgs e)
-        {
-            serialPort1.RtsEnable = true;
-        }
 
         private void buttonRefreshDSRCTS_Click(object sender, RoutedEventArgs e)
         {
@@ -158,14 +198,6 @@ namespace V1Auslesen
         private delegate void ParseShotDelegate(string text);
         private delegate void SendACKDelegate();
 
-        private void SendACK() {
-            // 0x06 ist ACK 
-            byte[] acks = new byte[1]
-            {
-                0x06
-            };
-            serialPort1.Write(acks, 0, 1);
-        }
 
         private void WriteData(string text)
         {
@@ -196,21 +228,22 @@ namespace V1Auslesen
 
         private void buttonSnedCommand_Click(object sender, RoutedEventArgs e)
         {
-            SendData();
+            SendData(textBoxBefehl.Text);
         }
 
         private void textBoxBefehl_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                SendData();
+                SendData(textBoxBefehl.Text);
             }
         }
 
-        private void SendData()
+        private void SendData(string text)
         {
             //Preprocess Data
-            string command = textBoxBefehl.Text.Trim() + "\r";
+
+            string command = text.Trim() + "\r";
             // Print command as dezimal values 
             byte[] buf = Encoding.ASCII.GetBytes(command);
             textBoxOutput.AppendText(BitConverter.ToString(buf) + "\n");
