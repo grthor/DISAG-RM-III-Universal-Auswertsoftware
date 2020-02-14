@@ -156,18 +156,6 @@ namespace V1Auslesen
         }
 
 
-        private void buttonRefreshDSRCTS_Click(object sender, RoutedEventArgs e)
-        {
-            if (serialPort1.CtsHolding)
-                labelCTS.Content = "on";
-            else
-                labelCTS.Content = "off";
-
-            if (serialPort1.DsrHolding)
-                labelDSR.Content = "on";
-            else
-                labelDSR.Content = "off";
-        }
 
         private void SerialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
