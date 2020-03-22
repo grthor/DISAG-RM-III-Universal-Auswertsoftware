@@ -189,7 +189,7 @@ namespace V1Auslesen
 
         private void WriteData(string text)
         {
-            textBoxReceivedData.Text += text;
+            textBoxReceivedData.Text += text + "\n";
             textBoxReceivedData.ScrollToEnd();
         }
 
