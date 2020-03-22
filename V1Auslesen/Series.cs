@@ -24,5 +24,10 @@ namespace V1Auslesen
             Schuss5 = new Shot();
         }
 
+        public override string ToString()
+        {
+            return (Schuss1.Ringe + Schuss2.Ringe + Schuss3.Ringe + Schuss4.Ringe + Schuss5.Ringe).ToString();
+        }
+
     }
 }

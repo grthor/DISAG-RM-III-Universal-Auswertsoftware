@@ -30,28 +30,48 @@ namespace V1Auslesen
         private StringBuilder readBuffer = new StringBuilder();
         private ObservableCollection<Teilnehmer> teilnehmer = new ObservableCollection<Teilnehmer>();
         private ObservableCollection<Shot> shots = new ObservableCollection<Shot>();
-        private Thread t;
+        private Thread connectThread;
         private Thread statusThread;
+        //private Thread ComPortListUpdaterThread;
+        private String[] availableCOMPorts;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            // Start the thread that is checking if the machine has 
+            // set DSR and CTS.
             statusThread = new Thread(new ThreadStart(CheckDTRRTS));
             statusThread.IsBackground = true;
             statusThread.Start();
 
-            string[] ports = SerialPort.GetPortNames();
-            foreach (String port in ports)
-            {
-                comboBoxCOMPorts.Items.Add(port);
-            }
-            if (ports.Length > 0)
-            {
-                comboBoxCOMPorts.SelectedItem = ports[0];
-            }
+            // Start job that checks the availability of COM Ports 
+            // and updates the dropdown menu
+            //ComPortListUpdaterThread = new Thread(new ThreadStart(ComPortListUpdater));
+            //ComPortListUpdaterThread.IsBackground = true;
+            //ComPortListUpdaterThread.Start();
 
-            createtTestUser();
+            // Add the available COM Ports to the dropdown menu.
+            availableCOMPorts = SerialPort.GetPortNames();
+            comboBoxCOMPorts.ItemsSource = availableCOMPorts;
+
+            // If at least one COM Port is available set it as selected item.
+            if (availableCOMPorts.Length > 0)
+                comboBoxCOMPorts.SelectedItem = availableCOMPorts[0];
+
+            createTestUser();
         }
+
+        private void comboBoxCOMPorts_DropDownOpened(object sender, EventArgs e)
+        {
+            string tempSelection = comboBoxCOMPorts.Text;
+            availableCOMPorts = SerialPort.GetPortNames();
+            comboBoxCOMPorts.ItemsSource = availableCOMPorts;
+            if (availableCOMPorts.Contains(tempSelection))
+                comboBoxCOMPorts.SelectedItem = tempSelection;
+
+        }
+
 
         private void buttonConnect_Click(object sender, RoutedEventArgs e)
         {
@@ -64,18 +84,23 @@ namespace V1Auslesen
                 serialPort1.Parity = Parity.None;
 
                 serialPort1.Open();
+                // Add a data Receive listener to the connection.
                 serialPort1.DataReceived += new SerialDataReceivedEventHandler(SerialPort1_DataReceived);
-
+                
+                // DTR must be set by the computer to make the machine receive commands
                 serialPort1.DtrEnable = true;
-                //t = new Thread(new ThreadStart(changeToRemoteControl));
-                //t.Start();
                 
-                
+                // Try to connect to machine
+                connectThread = new Thread(new ThreadStart(changeToRemoteControl));
+                connectThread.Start();
+
+                ProgressBarConnection.IsIndeterminate = true;
 
                 buttonConnect.IsEnabled = false;
                 buttonDisconnect.IsEnabled = true;
-                labelStatus.Content = "verbunden";
-                buttonSnedCommand.IsEnabled = true;
+                comboBoxCOMPorts.IsEnabled = false;
+
+
             }
             catch (Exception err)
             {
@@ -83,26 +108,92 @@ namespace V1Auslesen
             }
         }
 
+        private void changeToRemoteControl()
+        {
+            try
+            {
+                while (true)
+                {
+                    if (serialPort1.IsOpen)
+                    {
+                        if (serialPort1.CtsHolding || serialPort1.DsrHolding)
+                        {
+                            serialPort1.Write("V\r");
+                            Dispatcher.Invoke(new ChangeConnectionStatusDelegate(ChangeConnectionStatus), "Maschine auf Fernsteuerung umschalten");
+                        }
+                        else
+                        {
+                            // Maschine nicht bereit
+                            // Warten auf CTS DSR
+                            Dispatcher.Invoke(new ChangeConnectionStatusDelegate(ChangeConnectionStatus), "Warten auf DSR/CTS");
+                        }
+                    }
+                    else
+                    {
+                        // Serial Port not open
+                        Dispatcher.Invoke(new ChangeConnectionStatusDelegate(ChangeConnectionStatus), "Serial Port not open");
+                    }
+                    Thread.Sleep(500);
+                }
+            }
+            catch (ThreadInterruptedException)
+            {
+                return;
+            }
+        }
+
+        private delegate void ChangeConnectionStatusDelegate(string status);
+        private void ChangeConnectionStatus(string status)
+        {
+            if (!labelStatus.Content.Equals(status))
+            {
+                // Change status label.
+                labelStatus.Content = status;
+            }
+        }
+
+
         private void CheckDTRRTS()
         {
-            bool ctsHolding = false;
-            bool dsrHolding = false;
-            while (true)
+            try
             {
-                if (serialPort1.IsOpen)
+                bool ctsHolding = false;
+                bool dsrHolding = false;
+                while (true)
                 {
-                    if (ctsHolding != serialPort1.CtsHolding)
+                    if (serialPort1.IsOpen)
                     {
-                        Dispatcher.Invoke(new UpdateCTSLabelDelegete(UpdateCTSLabel), serialPort1.CtsHolding);
-                        ctsHolding = serialPort1.CtsHolding;
+                        if (ctsHolding != serialPort1.CtsHolding)
+                        {
+                            Dispatcher.Invoke(new UpdateCTSLabelDelegete(UpdateCTSLabel), serialPort1.CtsHolding);
+                            ctsHolding = serialPort1.CtsHolding;
+                            // Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), "CheckDTRRTS() - CTS" + ctsHolding);
+                        }
+                        if (dsrHolding != serialPort1.DsrHolding)
+                        {
+                            Dispatcher.Invoke(new UpdateDSRLabelDelegate(UpdateDSRLabel), serialPort1.DsrHolding);
+                            dsrHolding = serialPort1.DsrHolding;
+                            // Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), "CheckDTRRTS() - DSR" + dsrHolding);
+                        }
                     }
-                    if (dsrHolding != serialPort1.DsrHolding)
+                    // This is the case if the machine is shut of.
+                    if (ctsHolding != false)
                     {
-                        Dispatcher.Invoke(new UpdateDSRLabelDelegate(UpdateDSRLabel), serialPort1.DsrHolding);
-                        dsrHolding = serialPort1.DsrHolding;
+                        Dispatcher.Invoke(new UpdateCTSLabelDelegete(UpdateCTSLabel), false);
+                        ctsHolding = false;
                     }
+                    if (dsrHolding != false)
+                    {
+                        Dispatcher.Invoke(new UpdateDSRLabelDelegate(UpdateDSRLabel), false);
+                        dsrHolding = false;
+                    }
+                    // Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), "CheckDTRRTS() - No Connection opened");
+                    Thread.Sleep(200);
                 }
-                Thread.Sleep(500);
+            }
+            catch (ThreadInterruptedException)
+            {
+                return;
             }
         }
 
@@ -112,24 +203,16 @@ namespace V1Auslesen
         private void UpdateCTSLabel(bool status)
         {
             if (status)
-            {
-                labelCTS.Content = "on";
-            }
+                labelCTS.Content = "CTS on";
             else
-            {
-                labelCTS.Content = "off";
-            }
+                labelCTS.Content = "CTS off";
         }
         private void UpdateDSRLabel(bool status)
         {
             if (status)
-            {
-                labelDSR.Content = "on";
-            } 
+                labelDSR.Content = "DSR on";
             else
-            {
-                labelDSR.Content = "off";
-            }
+                labelDSR.Content = "DSR off";
         }
 
 
@@ -140,6 +223,12 @@ namespace V1Auslesen
             {
                 try
                 {
+                    // End the connect thread.
+                    connectThread.Interrupt();
+                    if (connectThread.IsAlive) 
+                    {
+                        connectThread.Join();
+                    }
 
                     serialPort1.Close();
 
@@ -147,6 +236,9 @@ namespace V1Auslesen
                     buttonDisconnect.IsEnabled = false;
                     buttonConnect.IsEnabled = true;
                     buttonSnedCommand.IsEnabled = false;
+                    ProgressBarConnection.IsIndeterminate = false;
+                    ProgressBarConnection.Value = 0;
+                    comboBoxCOMPorts.IsEnabled = true;
                 }
                 catch (Exception err)
                 {
@@ -165,18 +257,19 @@ namespace V1Auslesen
             // If not working change to 
             string dataIn = serialPort1.ReadLine();
             // string dataIn = serialPort1.ReadExisting();
-            Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), dataIn);
-            // Send ACK; hier müsste man jetzt prüfen ob die Checksumme
-            // stimmt.Letztes Zeichen ist Checksumme(Alle Zeichen xor verknüpft)
-            // Wenn kleiner als checksumme< 32, dann checksumme +32(anzeigbarkeit < 32 nur steuerzeichen)
-            // Dispatcher.Invoke(new SendACKDelegate(SendACK));
+            
+            // Maschine sende "HKeineBerechtigung" nach dem V\r erfolgreich 
+            // empfangen wurde.
+            if (dataIn.Contains("Keine Berechtigung"))
+                Dispatcher.Invoke(new ChangeConnectionStatusDelegate(ChangeConnectionStatus), "Auf Fernsteuerungsbestätigung warten");
+            
+            // Maschine sendet "F794" wenn man V\r sendet, die Maschine aber
+            // bereits erfolgreich auf FErn umgestellt wurde.
+            // Wenn "F974" empfangen wurde ist die Maschine erfolgreich umgestellt.
+            if (dataIn.Contains("F794"))
+                Dispatcher.Invoke(new MachineConnectedDelegate(MachineConnected));
 
-            //Read HEX Code
-            //int length = serialPort1.BytesToRead;
-            //byte[] buf = new byte[length];
-            //serialPort1.Read(buf, 0, length);
-            //System.Diagnostics.Debug.WriteLine("Received Data:" + buf);
-            //Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), BitConverter.ToString(buf));
+            Dispatcher.Invoke(new UpdateUiTextDelegate(WriteData), dataIn);
 
             // Parse the input:
             // Dispatcher.Invoke(new ParseShotDelegate(ParseShot), dataIn);
@@ -186,10 +279,28 @@ namespace V1Auslesen
         private delegate void ParseShotDelegate(string text);
         private delegate void SendACKDelegate();
 
+        private delegate void MachineConnectedDelegate();
+
+
+        private void MachineConnected()
+        {
+            if (connectThread.IsAlive)
+            {
+                connectThread.Interrupt();
+                connectThread.Join();
+            }
+            ProgressBarConnection.IsIndeterminate = false;
+            ProgressBarConnection.Value = 100;
+            labelStatus.Content = "Machine verbunden";
+
+            // Hier alle Buttons enablen die enabled sein soll, wenn die Machine verbunden ist.
+            buttonSnedCommand.IsEnabled = true;
+        }
+
 
         private void WriteData(string text)
         {
-            textBoxReceivedData.Text += text;
+            textBoxReceivedData.Text += text + "\n";
             textBoxReceivedData.ScrollToEnd();
         }
 
@@ -305,7 +416,7 @@ namespace V1Auslesen
         }
 
 
-        private void createtTestUser()
+        private void createTestUser()
         {
             //Create some default users
             var user1 = new Teilnehmer
@@ -370,8 +481,6 @@ namespace V1Auslesen
             // Bind dataGridTeilnehmer to Teilnehmer
             dataGridTeilnehmer.ItemsSource = teilnehmer;
         }
-
-
 
 
     }

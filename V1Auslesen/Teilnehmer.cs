@@ -21,9 +21,9 @@ namespace V1Auslesen
             Vorname = "";
             Nachname = "";
             Mannschaft = "";
-            Geschlecht = Geschl.m;
             Ringe = new MyObservableCollection<Series>();
         }
+
 
     }
 }

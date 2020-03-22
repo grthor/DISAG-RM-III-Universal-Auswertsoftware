@@ -9,23 +9,21 @@
     <Grid>
         <Button x:Name="buttonConnect" Content="Connect" HorizontalAlignment="Left" Margin="135,33,0,0" VerticalAlignment="Top" Width="82" Click="buttonConnect_Click"/>
         <Button x:Name="buttonDisconnect" Content="Disconnect" HorizontalAlignment="Left" Margin="222,33,0,0" VerticalAlignment="Top" Click="buttonDisconnect_Click" IsEnabled="False" Width="80"/>
-        <ComboBox x:Name="comboBoxCOMPorts" HorizontalAlignment="Left" Margin="10,32,0,0" VerticalAlignment="Top" Width="120"/>
-        <Label x:Name="labelStatus" Content="getrennt" HorizontalAlignment="Left" Margin="135,58,0,0" VerticalAlignment="Top" Width="120"/>
-        <Label Content="Verbindungsstatus:" HorizontalAlignment="Left" Margin="10,59,0,0" VerticalAlignment="Top" Width="120" Background="White"/>
-        <Label Content="Status der RM III" HorizontalAlignment="Left" Margin="14,84,0,0" VerticalAlignment="Top"/>
-        <Label Content="Data Set Ready (DSR) gesetzt" HorizontalAlignment="Left" Margin="14,105,0,0" VerticalAlignment="Top"/>
-        <Label Content="Clear To Send (CTS) gesetzt" HorizontalAlignment="Left" Margin="14,126,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="labelDSR" Content="off" HorizontalAlignment="Left" Margin="183,105,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="labelCTS" Content="off" HorizontalAlignment="Left" Margin="183,126,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="textBoxReceivedData" HorizontalAlignment="Left" Margin="307,33,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="337" Height="184"/>
+        <ComboBox x:Name="comboBoxCOMPorts" HorizontalAlignment="Left" Margin="10,32,0,0" VerticalAlignment="Top" Width="120" DropDownOpened="comboBoxCOMPorts_DropDownOpened"/>
+        <Label x:Name="labelStatus" Content="getrennt" HorizontalAlignment="Left" Margin="97,63,0,0" VerticalAlignment="Top" Width="205"/>
+        <Label Content="Status der RM III:" HorizontalAlignment="Left" Margin="10,94,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="labelDSR" Content="DSR off" HorizontalAlignment="Left" Margin="164,94,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="labelCTS" Content="CTS off" HorizontalAlignment="Left" Margin="116,94,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="textBoxReceivedData" HorizontalAlignment="Left" Margin="307,33,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="337" Height="74" VerticalScrollBarVisibility="Auto"/>
         <Label Content="Epfangene Daten" HorizontalAlignment="Left" Margin="307,10,0,0" VerticalAlignment="Top"/>
         <Label x:Name="labelReadBuffer" Content="" HorizontalAlignment="Left" Margin="503,10,0,0" VerticalAlignment="Top"/>
-        <DataGrid x:Name="dataGridTeilnehmer" Margin="307,222,658,108" SelectionChanged="dataGridTeilnehmer_SelectionChanged"/>
+        <DataGrid x:Name="dataGridTeilnehmer" Margin="307,112,358,108" SelectionChanged="dataGridTeilnehmer_SelectionChanged"/>
         <TextBox x:Name="textBoxBefehl" HorizontalAlignment="Left" Margin="12,248,0,0" Text="Befehl" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" KeyDown="textBoxBefehl_KeyDown"/>
         <Button x:Name="buttonSnedCommand" Content="Befehl senden" HorizontalAlignment="Left" Margin="224,247,0,0" VerticalAlignment="Top" Click="buttonSnedCommand_Click" IsEnabled="False"/>
         <TextBox x:Name="textBoxOutput" HorizontalAlignment="Left" Margin="10,323,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="292" Height="136" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
         <Label x:Name="label" Content="Gesendete Befehle" HorizontalAlignment="Left" Margin="10,297,0,0" VerticalAlignment="Top"/>
-        <DataGrid x:Name="dataGridSeries" Margin="498,222,497,108"/>
+        <DataGrid x:Name="dataGridSeries" Margin="788,222,207,108"/>
+        <ProgressBar x:Name="ProgressBarConnection" HorizontalAlignment="Left" Height="18" Margin="10,67,0,0" VerticalAlignment="Top" Width="82"/>
 
     </Grid>
 </Window>
